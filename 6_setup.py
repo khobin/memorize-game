@@ -1,3 +1,4 @@
+from ast import While
 import pygame
 from random import *
 
@@ -55,6 +56,11 @@ def shuffle_grid(number_count):
 def display_start_screen():
     pygame.draw.circle(screen, WHITE, start_button.center, 60, 5)
 
+    msg = game_font.render(f"{curr_level}", True, WHITE)
+    msg_rect = msg.get_rect(center = start_button.center)
+
+    screen.blit(msg, msg_rect)
+
 # 게임 화면 보여주기
 
 
@@ -84,7 +90,7 @@ def check_buttons(pos):
 
 
 def check_number_buttons(pos):
-    global hidden
+    global start, hidden, curr_level
     for button in number_buttons:
         if button.collidepoint(pos):
             if button == number_buttons[0]:
@@ -93,9 +99,23 @@ def check_number_buttons(pos):
                 if not hidden:
                     hidden = True
             else:
-                print("wrong")
-            break
+                game_over()
 
+            break
+    if len(number_buttons) == 0:
+        start = False
+        hidden = False
+        curr_level += 1
+        setup(curr_level)
+
+def game_over():
+    global running
+    running = False
+    msg = game_font.render(f"Your level is{curr_level}", True, WHITE)
+    msg_rect = msg.get_rect(center = (screen_width/2, screen_height/2))
+
+    screen.fill(BLACK)
+    screen.blit(msg, msg_rect)
 # 초기화
 pygame.init()
 screen_width = 1280
@@ -117,6 +137,7 @@ BLUE = (0, 0, 255)
 GRAY = (50, 50, 50)
 
 number_buttons = []
+curr_level = 1
 display_time = None # 숫자를 보여주는 시간
 start_ticks = None # 시간 계산 (현재 시간 정보를 저장)
 
@@ -124,7 +145,7 @@ start_ticks = None # 시간 계산 (현재 시간 정보를 저장)
 start = False
 # 숫자 숨김 여부 (사용자가 1 클릭 시 혹은 보여주는 시간 초과 시)
 hidden = False
-setup(1)
+setup(curr_level)
 
 
 # 게임 루프
@@ -149,9 +170,11 @@ while running:
     if click_pos:
         check_buttons(click_pos)
 
+
+
     # 화면 업데이트
     pygame.display.update()
 
-
+pygame.time.delay(5000)
 # 게임 종료
 pygame.quit()
